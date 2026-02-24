@@ -205,8 +205,8 @@
                 <p class="text-[10px] text-amber-700 mb-4 font-medium uppercase tracking-tight">Copy this text and save it to a notepad. Paste it back here to restore your data instantly.</p>
                 <div class="flex gap-2">
                     <input id="backupInput" type="text" class="flex-grow bg-white border border-amber-200 rounded-lg px-4 py-2 text-[10px] font-mono" placeholder="Backup string generation...">
-                    <button onclick="exportBackup()" class="bg-amber-600 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase">Copy Link</button>
-                    <button onclick="importBackup()" class="bg-amber-800 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase">Restore</button>
+                    <button onclick="exportBackup()" class="bg-amber-600 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase hover:opacity-90">Copy Code</button>
+                    <button onclick="importBackup()" class="bg-amber-800 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase hover:opacity-90">Restore</button>
                 </div>
             </div>
 
@@ -413,23 +413,52 @@
             });
         };
 
+        // ENHANCED BACKUP LOGIC (UTF-8 Compatible)
         window.exportBackup = () => {
-            const data = btoa(JSON.stringify({ store: window.store, districtId: window.activeDistrictId }));
-            document.getElementById('backupInput').value = data;
-            document.getElementById('backupInput').select();
-            document.execCommand('copy');
+            try {
+                if (window.activeDistrictId === "Unknown") {
+                    alert("Please map district data before exporting.");
+                    return;
+                }
+                const str = JSON.stringify({ store: window.store, districtId: window.activeDistrictId });
+                // Robust UTF-8 Base64 encoding
+                const data = btoa(unescape(encodeURIComponent(str)));
+                const input = document.getElementById('backupInput');
+                input.value = data;
+                input.select();
+                document.execCommand('copy');
+                alert("Backup string generated and copied to clipboard!");
+            } catch (e) {
+                console.error("Backup failed", e);
+                alert("Error generating backup code.");
+            }
         };
 
         window.importBackup = () => {
             const val = document.getElementById('backupInput').value;
-            if (!val) return;
+            if (!val) {
+                alert("Please paste a backup string first.");
+                return;
+            }
             try {
-                const data = JSON.parse(atob(val));
-                window.store = data.store;
-                window.activeDistrictId = data.districtId;
-                window.refreshUI();
-                window.saveToCloud();
-            } catch(e) { console.error("Backup corrupted."); }
+                // Robust UTF-8 Base64 decoding
+                const str = decodeURIComponent(escape(atob(val)));
+                const data = JSON.parse(str);
+                
+                if (data.store && data.districtId) {
+                    window.store = data.store;
+                    window.activeDistrictId = data.districtId;
+                    document.getElementById('districtSelector').value = window.activeDistrictId;
+                    window.refreshUI();
+                    window.saveToCloud();
+                    alert("Data restored successfully!");
+                } else {
+                    throw new Error("Invalid backup format.");
+                }
+            } catch(e) { 
+                console.error("Restore failed", e);
+                alert("Invalid or corrupted backup string."); 
+            }
         };
     </script>
 
