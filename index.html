@@ -211,7 +211,7 @@
             </div>
 
             <div class="mt-8 text-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <p id="lastSavedLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Dashboard Sync Status: Local Mode</p>
+                <p id="lastSavedLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic text-nowrap">Dashboard Sync Status: Local Standalone</p>
                 <div class="mt-2 flex justify-center gap-2">
                     <button id="saveBtn" onclick="window.saveToCloud()" class="bg-slate-800 text-white text-[10px] px-3 py-1 rounded font-bold uppercase hover:bg-black transition-all">Manual Sync</button>
                 </div>
@@ -231,6 +231,11 @@
             "26": { clubBase: 146, clubGoal: 148, payGoal: 5483, distGoal: 66 },
             "78": { clubBase: 54, clubGoal: 55, payGoal: 1756, distGoal: 25 }
         };
+
+        // --- HARDCODING SLOT START ---
+        // PASTE YOUR "COPY CODE" STRING BETWEEN THE QUOTES BELOW TO MAKE DATA PERMANENT
+        const PERMANENT_DATA_RESTORE_STRING = ""; 
+        // --- HARDCODING SLOT END ---
 
         const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
         if (isAdmin) { document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block'); }
@@ -279,7 +284,7 @@
             const base = BASELINES[currentId] || { clubBase: 0, clubGoal: 0, payGoal: 0, distGoal: 0 };
 
             document.getElementById('navTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Analytics` : "District Performance Dashboard";
-            document.getElementById('districtTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Summary` : "Dashboard Ready";
+            document.getElementById('districtTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Summary` : "Identify District";
             
             document.getElementById('labelClubBase').innerText = `Base: ${base.clubBase || '--'}`;
             document.getElementById('valClubToDate').innerText = s.clubToDate || 0;
@@ -413,7 +418,6 @@
             });
         };
 
-        // ENHANCED BACKUP LOGIC (UTF-8 Compatible)
         window.exportBackup = () => {
             try {
                 if (window.activeDistrictId === "Unknown") {
@@ -421,44 +425,30 @@
                     return;
                 }
                 const str = JSON.stringify({ store: window.store, districtId: window.activeDistrictId });
-                // Robust UTF-8 Base64 encoding
                 const data = btoa(unescape(encodeURIComponent(str)));
                 const input = document.getElementById('backupInput');
                 input.value = data;
                 input.select();
                 document.execCommand('copy');
                 alert("Backup string generated and copied to clipboard!");
-            } catch (e) {
-                console.error("Backup failed", e);
-                alert("Error generating backup code.");
-            }
+            } catch (e) { alert("Error generating backup code."); }
         };
 
-        window.importBackup = () => {
-            const val = document.getElementById('backupInput').value;
-            if (!val) {
-                alert("Please paste a backup string first.");
-                return;
-            }
+        window.importBackup = (valOverride = null) => {
+            const val = valOverride || document.getElementById('backupInput').value;
+            if (!val) return;
             try {
-                // Robust UTF-8 Base64 decoding
                 const str = decodeURIComponent(escape(atob(val)));
                 const data = JSON.parse(str);
-                
                 if (data.store && data.districtId) {
                     window.store = data.store;
                     window.activeDistrictId = data.districtId;
                     document.getElementById('districtSelector').value = window.activeDistrictId;
                     window.refreshUI();
                     window.saveToCloud();
-                    alert("Data restored successfully!");
-                } else {
-                    throw new Error("Invalid backup format.");
+                    if (!valOverride) alert("Data restored successfully!");
                 }
-            } catch(e) { 
-                console.error("Restore failed", e);
-                alert("Invalid or corrupted backup string."); 
-            }
+            } catch(e) { if (!valOverride) alert("Invalid or corrupted backup string."); }
         };
     </script>
 
@@ -467,7 +457,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Environment Detection
         const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : "";
         const rawAppId = typeof __app_id !== 'undefined' ? __app_id : "external-host";
         
@@ -521,7 +510,7 @@
                     }
                     const ts = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'Recently';
                     const lbl = document.getElementById('lastSavedLabel');
-                    if (lbl) lbl.innerText = `Database Status: Shared Ground Truth Restored (${ts})`;
+                    if (lbl) lbl.innerText = `Database Status: Ground Truth Verified (${ts})`;
                     updateCloudStatus('Secure Connection', 'text-green-500');
                 } else {
                     updateCloudStatus('New Session', 'text-slate-400');
@@ -535,7 +524,12 @@
         };
 
         (async () => {
-            // Standard host deployment bypasses the wheel in < 1 second.
+            // First: Attempt to load from the "Baked-in" slot for static persistence
+            if (PERMANENT_DATA_RESTORE_STRING && PERMANENT_DATA_RESTORE_STRING.length > 10) {
+                window.importBackup(PERMANENT_DATA_RESTORE_STRING);
+            }
+
+            // Standard host deployment bypasses the wheel quickly
             setTimeout(window.dismissLoader, isConfigured ? 3500 : 500); 
             
             if (isConfigured) {
@@ -551,7 +545,7 @@
                 } catch (e) { window.dismissLoader(); }
             } else {
                 const lbl = document.getElementById('lastSavedLabel');
-                if (lbl) lbl.innerText = "System: Standalone Local Mode (Cloud Disabled)";
+                if (lbl) lbl.innerText = PERMANENT_DATA_RESTORE_STRING ? "Status: Baked Data Active" : "Status: Waiting for Data Configuration";
             }
             window.refreshUI();
         })();
