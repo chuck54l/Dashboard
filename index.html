@@ -59,7 +59,6 @@
             </div>
             <div class="flex gap-1 bg-black/10 p-1 rounded-lg">
                 <button onclick="changeTab('summary')" id="tab-summary" class="nav-link active">Summary</button>
-                <button onclick="changeTab('divisions')" id="tab-divisions" class="nav-link">Divisions</button>
                 <button onclick="changeTab('manage')" id="tab-manage" class="nav-link text-yellow-200 font-bold admin-only">Update Data</button>
             </div>
         </div>
@@ -72,12 +71,13 @@
                 <div>
                     <h2 id="districtTitle" class="text-3xl font-black text-slate-800 tracking-tight uppercase">Loading...</h2>
                     <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">
-                        Status: Performance Hub <span id="headerLastUpdated" class="ml-2 text-[#772432] font-black"></span>
+                        Status: Performance Hub <span id="headerLastUpdated" class="ml-2 text-[#772432] font-black underline"></span>
                     </p>
                 </div>
                 <div id="sourceStatus" class="flex gap-4"></div>
             </div>
 
+            <!-- ROW 1: CORE KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-nowrap">
                 <div class="card p-6 border-l-4 border-l-blue-900 shadow-sm">
                     <div class="flex justify-between items-start text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
@@ -110,6 +110,7 @@
                 </div>
             </div>
 
+            <!-- ROW 2: OFFICIAL BREAKDOWN -->
             <div class="mb-8">
                 <div class="card p-8 group border-t-4 border-t-yellow-400 shadow-sm">
                     <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-8 border-b pb-4 text-center md:text-left">Official Payment Breakdown</h3>
@@ -138,32 +139,29 @@
                 </div>
             </div>
 
-            <div class="mb-8">
+            <!-- ROW 3: MEMBER DATA & POTENTIALS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div class="card p-8 text-center md:text-left border-l-4 border-l-[#004165] shadow-sm">
-                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Paid Member Comparison (Club Row Sums)</h3>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                        <div class="lg:col-span-2 h-[220px]">
-                            <canvas id="aggMemberChart"></canvas>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Member Row Integrity (Aggregate Sums)</h3>
+                    <div class="h-[180px] mb-6">
+                        <canvas id="aggMemberChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div class="p-3 bg-slate-50 rounded-xl">
+                            <div class="text-[8px] font-black text-slate-400 uppercase mb-1 tracking-tighter text-nowrap">Sum Row Base</div>
+                            <div id="sumBase" class="text-xl font-black text-slate-800">0</div>
                         </div>
-                        <div class="grid grid-cols-1 gap-4 text-center md:text-left bg-slate-50 p-6 rounded-2xl shadow-inner">
-                            <div>
-                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Row Base</div>
-                                <div id="sumBase" class="text-2xl font-black text-slate-800 font-mono">0</div>
-                            </div>
-                            <div>
-                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Row Active</div>
-                                <div id="sumToDate" class="text-2xl font-black text-[#772432] font-mono">0</div>
-                            </div>
-                            <div>
-                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Row Net Growth</div>
-                                <div id="sumNet" class="text-2xl font-black font-mono">0</div>
-                            </div>
+                        <div class="p-3 bg-[#772432]/5 rounded-xl">
+                            <div class="text-[8px] font-black text-slate-400 uppercase mb-1 tracking-tighter text-nowrap">Sum Row Active</div>
+                            <div id="sumToDate" class="text-xl font-black text-[#772432]">0</div>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-xl">
+                            <div class="text-[8px] font-black text-slate-400 uppercase mb-1 tracking-tighter text-nowrap">Sum Row Net</div>
+                            <div id="sumNet" class="text-xl font-black text-green-600">0</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="mb-8">
                 <div class="card p-8 border-l-4 border-l-yellow-500 relative overflow-hidden text-center md:text-left shadow-sm">
                     <div class="flex justify-between items-center mb-6 relative z-10 text-slate-400">
                         <span class="text-xs font-black uppercase tracking-widest">Potential Distinguished Clubs</span>
@@ -172,39 +170,39 @@
                             <span class="goal-label block uppercase tracking-widest"> Ready / Goal: <span id="labelDistGoal">--</span></span>
                         </div>
                     </div>
-                    <div class="h-[120px] relative z-10"><canvas id="potSummaryChart"></canvas></div>
+                    <div class="h-[140px] relative z-10"><canvas id="potSummaryChart"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <div id="divisions" class="page-section">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 text-center md:text-left">
-                <div class="card p-8"><h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Active Members by Division</h3><canvas id="divActiveChart" height="300"></canvas></div>
-                <div class="card p-8"><h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Potential Dist. Clubs by Division</h3><canvas id="divPotChart" height="300"></canvas></div>
-            </div>
-        </div>
-
+        <!-- Manage Tab (Admin Only) -->
         <div id="manage" class="page-section admin-only">
-            <h2 class="text-2xl font-bold text-slate-700 uppercase tracking-tight mb-6">Update Data Console</h2>
+            <h2 class="text-2xl font-bold text-slate-700 uppercase tracking-tight mb-6">Update District Summary</h2>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <div class="card p-8 border-t-4 border-t-[#772432]">
                     <h3 class="font-black text-xs uppercase text-slate-400 mb-2">1. District Performance CSV</h3>
                     <textarea id="csvDistrictInput" class="w-full h-48 bg-slate-50 border rounded-2xl p-4 text-[10px] font-mono focus:outline-none" placeholder="Paste District CSV content here..."></textarea>
-                    <button onclick="processDistrictCSV()" class="mt-4 w-full tm-maroon text-white font-black py-3 rounded-xl shadow-lg active:scale-[0.98]">Map District Stats</button>
-                    <div id="districtLog" class="text-[10px] font-bold text-green-600 mt-2 text-center uppercase tracking-widest"></div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="processDistrictCSV()" class="flex-grow tm-maroon text-white font-black py-3 rounded-xl shadow-lg active:scale-[0.98]">Map District Stats</button>
+                        <button onclick="clearDistrictData()" class="bg-slate-200 text-slate-500 font-bold px-4 py-3 rounded-xl hover:bg-slate-300">Clear</button>
+                    </div>
+                    <div id="districtLog" class="text-[10px] font-bold text-green-600 mt-2 text-center uppercase tracking-widest h-4"></div>
                 </div>
                 <div class="card p-8 border-t-4 border-t-[#004165]">
                     <h3 class="font-black text-xs uppercase text-slate-400 mb-2">2. Club Performance CSV</h3>
                     <textarea id="csvClubInput" class="w-full h-48 bg-slate-50 border rounded-2xl p-4 text-[10px] font-mono focus:outline-none" placeholder="Paste Club CSV content here..."></textarea>
-                    <button onclick="processClubCSV()" class="mt-4 w-full bg-[#004165] text-white font-black py-3 rounded-xl shadow-lg active:scale-[0.98]">Map Club Rows</button>
-                    <div id="clubLog" class="text-[10px] font-bold text-green-600 mt-2 text-center uppercase tracking-widest"></div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="processClubCSV()" class="flex-grow bg-[#004165] text-white font-black py-3 rounded-xl shadow-lg active:scale-[0.98]">Map Club Rows</button>
+                        <button onclick="clearClubData()" class="bg-slate-200 text-slate-500 font-bold px-4 py-3 rounded-xl hover:bg-slate-300">Clear</button>
+                    </div>
+                    <div id="clubLog" class="text-[10px] font-bold text-green-600 mt-2 text-center uppercase tracking-widest h-4"></div>
                 </div>
             </div>
 
             <div class="card p-8 border-t-4 border-t-amber-500 bg-amber-50/30">
                 <h3 class="font-black text-xs uppercase text-amber-600 mb-2">Manual Data Backup String</h3>
-                <p class="text-[10px] text-amber-700 mb-4 font-medium uppercase tracking-tight">Copy this text and save it to the appropriate slot in the code below to make it permanent.</p>
+                <p class="text-[10px] text-amber-700 mb-4 font-medium uppercase tracking-tight">Copy this text and save it to the appropriate slot in the code below to make it permanent for everyone.</p>
                 <div class="flex gap-2">
                     <input id="backupInput" type="text" class="flex-grow bg-white border border-amber-200 rounded-lg px-4 py-2 text-[10px] font-mono" placeholder="Backup string generation...">
                     <button onclick="exportBackup()" class="bg-amber-600 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase hover:opacity-90">Copy Code</button>
@@ -213,7 +211,7 @@
             </div>
 
             <div class="mt-8 text-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <p id="lastSavedLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic text-nowrap">Dashboard Sync Status: Multi-District Baked Storage</p>
+                <p id="lastSavedLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic text-nowrap">Dashboard Sync Status: Summary Data Mode</p>
                 <div class="mt-2 flex justify-center gap-2">
                     <button id="saveBtn" onclick="window.saveToCloud()" class="bg-slate-800 text-white text-[10px] px-3 py-1 rounded font-bold uppercase hover:bg-black transition-all">Manual Sync</button>
                 </div>
@@ -223,7 +221,7 @@
 
     <script>
         /**
-         * ROBUST DATA CONTROLLER
+         * GLOBAL DATA CONTROLLER
          */
         const BASELINES = {
             "16": { clubBase: 51, clubGoal: 52, payGoal: 1785, distGoal: 23 },
@@ -235,10 +233,9 @@
         };
 
         // --- MULTI-DISTRICT BAKED DATA MAP ---
-        // Paste your exported code strings here for each district to make them permanent.
         const DISTRICT_DATA_MAP = {
-            "16": "eyJzdG9yZSI6eyJzdGF0cyI6eyJyZW5ld2FscyI6NzE4LCJuZXciOjE1MywiY2hhcnRlciI6MCwicGF5VG9EYXRlIjo4NzEsImNsdWJzQ2hhcnRlcmVkIjowLCJsYXN0VXBkYXRlZCI6IkZlYnJ1YXJ5IDE1LCAyMDI2IiwiY2x1YlRvRGF0ZSI6NDR9LCJjbHVicyI6W3sic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjoyMiwiYWN0aXZlIjozMSwibmV0Ijo5LCJnb2FscyI6OX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJOIiwiZGl2IjoiSyIsImJhc2UiOjExLCJhY3RpdmUiOjgsIm5ldCI6LTMsImdvYWxzIjoxfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6OSwiYWN0aXZlIjo5LCJuZXQiOjAsImdvYWxzIjozfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6OSwiYWN0aXZlIjo4LCJuZXQiOi0xLCJnb2FscyI6MH0seyJzdGF0dXMiOiJTdXNwZW5kZWQiLCJjc3AiOiJOIiwiZGl2IjoiSyIsImJhc2UiOjAsImFjdGl2ZSI6MCwibmV0IjowLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiSyIsImJhc2UiOjE1LCJhY3RpdmUiOjE1LCJuZXQiOjAsImdvYWxzIjoxfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MTMsImFjdGl2ZSI6MTQsIm5ldCI6MSwiZ29hbHMiOjZ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjoyLCJhY3RpdmUiOjgsIm5ldCI6NiwiZ29hbHMiOjF9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjoxMiwiYWN0aXZlIjo4LCJuZXQiOi00LCJnb2FscyI6M30seyJzdGF0dXMiOiJTdXNwZW5kZWQiLCJjc3AiOiJOIiwiZGl2IjoiSyIsImJhc2UiOjIyLCJhY3RpdmUiOjAsIm5ldCI6LTIyLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiSyIsImJhc2UiOjI0LCJhY3RpdmUiOjE5LCJuZXQiOi01LCJnb2FscyI6Nn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiSyIsImJhc2UiOjE1LCJhY3RpdmUiOjE2LCJuZXQiOjEsImdvYWxzIjozfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MTIsImFjdGl2ZSI6MTEsIm5ldCI6LTEsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MTAsImFjdGl2ZSI6MTIsIm5ldCI6MiwiZ29hbHMiOjJ9LHsic3RhdHVzIjoiTG93IiwiY3NwIjoiTiIsImRpdiI6IksiLCJiYXNlIjoxNSwiYWN0aXZlIjo2LCJuZXQiOi05LCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiSyIsImJhc2UiOjIxLCJhY3RpdmUiOjI3LCJuZXQiOjYsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MTcsImFjdGl2ZSI6MTYsIm5ldCI6LTEsImdvYWxzIjoyfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6Ik4iLCJkaXYiOiJLIiwiYmFzZSI6MTMsImFjdGl2ZSI6MTgsIm5ldCI6NSwiZ29hbHMiOjF9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6Ik8iLCJiYXNlIjoxNCwiYWN0aXZlIjoxNiwibmV0IjoyLCJnb2FscyI6M30seyJzdGF0dXMiOiJTdXNwZW5kZWQiLCJjc3AiOiJOIiwiZGl2IjoiTyIsImJhc2UiOjIsImFjdGl2ZSI6MCwibmV0IjotMiwiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6Ik8iLCJiYXNlIjoxMiwiYWN0aXZlIjoxMiwibmV0IjowLCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjE5LCJhY3RpdmUiOjE3LCJuZXQiOi0yLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjIwLCJhY3RpdmUiOjE5LCJuZXQiOi0xLCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjI2LCJhY3RpdmUiOjI0LCJuZXQiOi0yLCJnb2FscyI6N30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjEzLCJhY3RpdmUiOjEzLCJuZXQiOjAsImdvYWxzIjozfSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6Ik4iLCJkaXYiOiJPIiwiYmFzZSI6NiwiYWN0aXZlIjo1LCJuZXQiOi0xLCJnb2FscyI6MH0seyJzdGF0dXMiOiJMb3ciLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjgsImFjdGl2ZSI6NSwibmV0IjotMywiZ29hbHMiOjJ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiTiIsImRpdiI6Ik8iLCJiYXNlIjozOCwiYWN0aXZlIjozMCwibmV0IjotOCwiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6Ik8iLCJiYXNlIjoyMiwiYWN0aXZlIjoyNCwibmV0IjoyLCJnb2FscyI6NX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjIxLCJhY3RpdmUiOjE0LCJuZXQiOi03LCJnb2FscyI6NH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjgsImFjdGl2ZSI6OCwibmV0IjowLCJnb2FscyI6MX0seyJzdGF0dXMiOiJMb3ciLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjgsImFjdGl2ZSI6NiwibmV0IjotMiwiZ29hbHMiOjJ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6Ik8iLCJiYXNlIjoxMywiYWN0aXZlIjoxNiwibmV0IjozLCJnb2FscyI6NX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjMwLCJhY3RpdmUiOjMzLCJuZXQiOjMsImdvYWxzIjo4fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6MjQsImFjdGl2ZSI6MjgsIm5ldCI6NCwiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6Ik8iLCJiYXNlIjo4LCJhY3RpdmUiOjksIm5ldCI6MSwiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoyNSwiYWN0aXZlIjoyNSwibmV0IjowLCJnb2FscyI6N30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjksImFjdGl2ZSI6OSwibmV0IjowLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjksImFjdGl2ZSI6OSwibmV0IjowLCJnb2FscyI6NH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjE0LCJhY3RpdmUiOjEzLCJuZXQiOi0xLCJnb2FscyI6OH0seyJzdGF0dXMiOiJTdXNwZW5kZWQiLCJjc3AiOiJOIiwiZGl2IjoiVCIsImJhc2UiOjgsImFjdGl2ZSI6MCwibmV0IjotOCwiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoxNCwiYWN0aXZlIjoxOCwibmV0Ijo0LCJnb2FscyI6NX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjEyLCJhY3RpdmUiOjgsIm5ldCI6LTQsImdvYWxzIjozfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MjEsImFjdGl2ZSI6MTQsIm5ldCI6LTcsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTUsImFjdGl2ZSI6MTksIm5ldCI6NCwiZ29hbHMiOjV9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjo4LCJhY3RpdmUiOjksIm5ldCI6MSwiZ29hbHMiOjJ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoyMCwiYWN0aXZlIjoxNiwibmV0IjotNCwiZ29hbHMiOjZ9LHsic3RhdHVzIjoiTG93IiwiY3NwIjoiTiIsImRpdiI6IlQiLCJiYXNlIjoxMCwiYWN0aXZlIjozLCJuZXQiOi03LCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjExLCJhY3RpdmUiOjEwLCJuZXQiOi0xLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjExLCJhY3RpdmUiOjEwLCJuZXQiOi0xLCJnb2FscyI6MH0seyJzdGF0dXMiOiJTdXNwZW5kZWQiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjMsImFjdGl2ZSI6MywibmV0IjowLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjIxLCJhY3RpdmUiOjIwLCJuZXQiOi0xLCJnb2FscyI6OH0seyJzdGF0dXMiOiJMb3ciLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjEwLCJhY3RpdmUiOjYsIm5ldCI6LTQsImdvYWxzIjozfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTEsImFjdGl2ZSI6MTAsIm5ldCI6LTEsImdvYWxzIjozfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTUsImFjdGl2ZSI6MTUsIm5ldCI6MCwiZ29hbHMiOjN9XX0sImRpc3RyaWN0SWQiOiIxNiJ9",
-            "22": "eyJzdG9yZSI6eyJzdGF0cyI6eyJjbHViVG9EYXRlIjo1NiwicmVuZXdhbHMiOjk1NSwibmV3IjoxOTksImNoYXJ0ZXIiOjQ1LCJwYXlUb0RhdGUiOjExOTksImNsdWJzQ2hhcnRlcmVkIjoyLCJsYXN0VXBkYXRlZCI6IkZlYnJ1YXJ5IDE1LCAyMDI2In0sImNsdWJzIjpbeyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjE1LCJhY3RpdmUiOjExLCJuZXQiOi00LCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjE4LCJhY3RpdmUiOjE1LCJuZXQiOi0zLCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJOIiwiZGl2IjoiTCIsImJhc2UiOjI2LCJhY3RpdmUiOjI5LCJuZXQiOjMsImdvYWxzIjoyfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJMIiwiYmFzZSI6OCwiYWN0aXZlIjoxMCwibmV0IjoyLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJMb3ciLCJjc3AiOiJOIiwiZGl2IjoiTCIsImJhc2UiOjksImFjdGl2ZSI6NiwibmV0IjotMywiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IkwiLCJiYXNlIjoxNSwiYWN0aXZlIjoxNiwibmV0IjoxLCJnb2FscyI6M30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJOIiwiZGl2IjoiTCIsImJhc2UiOjE5LCJhY3RpdmUiOjE3LCJuZXQiOi0yLCJnb2FscyI6M30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjE3LCJhY3RpdmUiOjE2LCJuZXQiOi0xLCJnb2FscyI6M30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjgsImFjdGl2ZSI6OSwibmV0IjoxLCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjQyLCJhY3RpdmUiOjQ2LCJuZXQiOjQsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6Ik4iLCJkaXYiOiJMIiwiYmFzZSI6MjIsImFjdGl2ZSI6MjMsIm5ldCI6MSwiZ29hbHMiOjF9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IkwiLCJiYXNlIjoxMSwiYWN0aXZlIjoxMSwibmV0IjowLCJnb2FscyI6NH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjExLCJhY3RpdmUiOjEwLCJuZXQiOi0xLCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjE0LCJhY3RpdmUiOjE0LCJuZXQiOjAsImdvYWxzIjoyfSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6Ik4iLCJkaXYiOiJMIiwiYmFzZSI6NywiYWN0aXZlIjo2LCJuZXQiOi0xLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjE2LCJhY3RpdmUiOjE1LCJuZXQiOi0xLCJnb2FscyI6NH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjIwLCJhY3RpdmUiOjE0LCJuZXQiOi02LCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjgsImFjdGl2ZSI6OCwibmV0IjowLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJOIiwiZGl2IjoiTCIsImJhc2UiOjE1LCJhY3RpdmUiOjE0LCJuZXQiOi0xLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTCIsImJhc2UiOjksImFjdGl2ZSI6OCwibmV0IjotMSwiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiTiIsImRpdiI6IkwiLCJiYXNlIjo5LCJhY3RpdmUiOjgsIm5ldCI6LTEsImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6Ik4iLCJkaXYiOiJMIiwiYmFzZSI6MjgsImFjdGl2ZSI6MjMsIm5ldCI6LTUsImdvYWxzIjoyfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6Ik4iLCJkaXYiOiJTIiwiYmFzZSI6MTUsImFjdGl2ZSI6MTEsIm5ldCI6LTQsImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJTIiwiYmFzZSI6MTQsImFjdGl2ZSI6MTEsIm5ldCI6LTMsImdvYWxzIjoxfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJTIiwiYmFzZSI6MTMsImFjdGl2ZSI6MTQsIm5ldCI6MSwiZ29hbHMiOjF9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlMiLCJiYXNlIjoyMywiYWN0aXZlIjoxOCwibmV0IjotNSwiZ29hbHMiOjJ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlMiLCJiYXNlIjoyOSwiYWN0aXZlIjoyNiwibmV0IjotMywiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiTiIsImRpdiI6IlMiLCJiYXNlIjoyMCwiYWN0aXZlIjoxNiwibmV0IjotNCwiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlMiLCJiYXNlIjoxMiwiYWN0aXZlIjoxOSwibmV0Ijo3LCJnb2FscyI6Nn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiUyIsImJhc2UiOjE0LCJhY3RpdmUiOjEwLCJuZXQiOi00LCJnb2FscyI6M30seyJzdGF0dXMiOiJJbmVsaWdpYmxlIiwiY3NwIjoiTiIsImRpdiI6IlMiLCJiYXNlIjoxNCwiYWN0aXZlIjoxLCJuZXQiOi0xMywiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlMiLCJiYXNlIjoyNSwiYWN0aXZlIjoxOSwibmV0IjotNiwiZ29hbHMiOjh9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlMiLCJiYXNlIjoyNCwiYWN0aXZlIjoyNCwibmV0IjowLCJnb2FscyI6Nn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiUyIsImJhc2UiOjgsImFjdGl2ZSI6OSwibmV0IjoxLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJOIiwiZGl2IjoiUyIsImJhc2UiOjksImFjdGl2ZSI6OCwibmV0IjotMSwiZ29hbHMiOjF9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlMiLCJiYXNlIjoxMiwiYWN0aXZlIjoxMSwibmV0IjotMSwiZ29hbHMiOjJ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiTiIsImRpdiI6IlMiLCJiYXNlIjoxNCwiYWN0aXZlIjoxMywibmV0IjotMSwiZ29hbHMiOjZ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiTiIsImRpdiI6IlMiLCJiYXNlIjoyMywiYWN0aXZlIjoyNSwibmV0IjoyLCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiUyIsImJhc2UiOjExLCJhY3RpdmUiOjgsIm5ldCI6LTMsImdvYWxzIjoxfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJTIiwiYmFzZSI6MTAsImFjdGl2ZSI6MTQsIm5ldCI6NCwiZ29hbHMiOjN9LHsic3RhdHVzIjoiTG93IiwiY3NwIjoiWSIsImRpdiI6IlMiLCJiYXNlIjo4LCJhY3RpdmUiOjcsIm5ldCI6LTEsImdvYWxzIjowfSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6Ik4iLCJkaXYiOiJTIiwiYmFzZSI6NiwiYWN0aXZlIjo1LCJuZXQiOi0xLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiUyIsImJhc2UiOjIzLCJhY3RpdmUiOjE0LCJuZXQiOi05LCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjE0LCJhY3RpdmUiOjE4LCJuZXQiOjQsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6OSwiYWN0aXZlIjoxMSwibmV0IjoyLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjEzLCJhY3RpdmUiOjExLCJuZXQiOi0yLCJnb2FscyI6M30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjE1LCJhY3RpdmUiOjE3LCJuZXQiOjIsImdvYWxzIjo1fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTEsImFjdGl2ZSI6MTUsIm5ldCI6NCwiZ29hbHMiOjR9LHsic3RhdHVzIjoiSW5lbGlnaWJsZSIsImNzcCI6Ik4iLCJkaXYiOiJUIiwiYmFzZSI6OCwiYWN0aXZlIjoxLCJuZXQiOi03LCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjExLCJhY3RpdmUiOjEwLCJuZXQiOi0xLCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjIyLCJhY3RpdmUiOjIxLCJuZXQiOi0xLCJnb2FscyI6M30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjgsImFjdGl2ZSI6MTMsIm5ldCI6NSwiZ29hbHMiOjV9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoyOCwiYWN0aXZlIjoyNSwibmV0IjotMywiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoxMCwiYWN0aXZlIjoxMywibmV0IjozLCJnb2FscyI6M30seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjEzLCJhY3RpdmUiOjExLCJuZXQiOi0yLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjE0LCJhY3RpdmUiOjE2LCJuZXQiOjIsImdvYWxzIjo0fSx7InN0YXR1cyI6IkluZWxpZ2libGUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjgsImFjdGl2ZSI6MiwibmV0IjotNiwiZ29hbHMiOjB9LHsic3RhdHVzIjoiU3VzcGVuZGVkIiwiY3NwIjoiTiIsImRpdiI6IlQiLCJiYXNlIjoxLCJhY3RpdmUiOjAsIm5ldCI6LTEsImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTQsImFjdGl2ZSI6MTYsIm5ldCI6MiwiZ29hbHMiOjV9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjo4LCJhY3RpdmUiOjgsIm5ldCI6MCwiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjo5LCJhY3RpdmUiOjgsIm5ldCI6LTEsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6Ik4iLCJkaXYiOiJUIiwiYmFzZSI6MTIsImFjdGl2ZSI6OCwibmV0IjotNCwiZ29hbHMiOjB9LHsic3RhdHVzIjoiU3VzcGVuZGVkIiwiY3NwIjoiTiIsImRpdiI6IlQiLCJiYXNlIjowLCJhY3RpdmUiOjAsIm5ldCI6MCwiZ29hbHMiOjB9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjo0OSwiYWN0aXZlIjo1OCwibmV0Ijo5LCJnb2FscyI6NX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjE2LCJhY3RpdmUiOjE4LCJuZXQiOjIsImdvYWxzIjoyfV19LCJkaXN0cmljdElkIjoiMjIifQ==",
+            "16": "",
+            "22": "",
             "24": "",
             "25": "",
             "26": "",
@@ -296,14 +293,11 @@
             const s = d.stats || {};
             const base = BASELINES[currentId] || { clubBase: 0, clubGoal: 0, payGoal: 0, distGoal: 0 };
 
-            document.getElementById('navTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Analytics` : "District Performance Dashboard";
+            document.getElementById('navTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Analytics` : "Performance Dashboard";
             document.getElementById('districtTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Summary` : "Identify District";
             
-            // Header: Last Updated
             const luEl = document.getElementById('headerLastUpdated');
-            if (luEl) {
-                luEl.innerText = s.lastUpdated ? `• AS OF: ${s.lastUpdated}` : "";
-            }
+            if (luEl) { luEl.innerText = s.lastUpdated ? `• AS OF: ${s.lastUpdated}` : ""; }
 
             document.getElementById('labelClubBase').innerText = `Base: ${base.clubBase || '--'}`;
             document.getElementById('valClubToDate').innerText = s.clubToDate || 0;
@@ -334,7 +328,7 @@
             document.getElementById('sumToDate').innerText = agg.active;
             const sn = document.getElementById('sumNet');
             sn.innerText = (agg.net >= 0 ? '+' : '') + agg.net;
-            sn.className = `text-2xl font-black font-mono ${agg.net >= 0 ? 'text-green-600' : 'text-red-500'}`;
+            sn.className = `text-xl font-black ${agg.net >= 0 ? 'text-green-600' : 'text-red-500'}`;
 
             Object.values(window.charts).forEach(c => c && c.destroy());
             try {
@@ -361,25 +355,6 @@
                         options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
                     });
                 }
-                const divs = [...new Set((d.clubs || []).map(c => c.div))].sort();
-                const divA = divs.map(dv => (d.clubs || []).filter(c => c.div === dv).reduce((s, c) => s + c.active, 0));
-                const ctx3 = document.getElementById('divActiveChart');
-                if (ctx3 && ctx3.offsetParent) {
-                    window.charts.divA = new Chart(ctx3.getContext('2d'), {
-                        type: 'bar',
-                        data: { labels: divs, datasets: [{ data: divA, backgroundColor: '#004165', label: 'Active Members' }] },
-                        options: { maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
-                    });
-                }
-                const divP = divs.map(dv => (d.clubs || []).filter(c => c.div === dv && c.goals >= 4 && (c.active >= 20 || c.net >= 3)).length);
-                const ctx4 = document.getElementById('divPotChart');
-                if (ctx4 && ctx4.offsetParent) {
-                    window.charts.divP = new Chart(ctx4.getContext('2d'), {
-                        type: 'bar',
-                        data: { labels: divs, datasets: [{ data: divP, backgroundColor: '#772432', label: 'Ready Clubs' }] },
-                        options: { maintainAspectRatio: false, scales: { y: { ticks: { stepSize: 1 } } } }
-                    });
-                }
             } catch (e) { }
         };
 
@@ -394,13 +369,9 @@
                 complete: (results) => {
                     const rows = results.data;
                     if(rows.length === 0) return;
-                    
-                    // Capture Last Line for "Last Updated" Info
                     const lastLineRow = rows[rows.length - 1];
                     const lastLineValues = Object.values(lastLineRow);
-                    // Extract first non-numeric/meaningful string from the last row (usually contains Month)
                     const lastUpdated = lastLineValues.find(v => v && v.toString().length > 3 && isNaN(v)) || "Recent";
-
                     const detectedId = findCol(rows[0], 'District', 'Dist', 'ID');
                     if(detectedId && BASELINES[detectedId.toString()]) {
                         window.activeDistrictId = detectedId.toString();
@@ -410,9 +381,7 @@
                         window.store.stats.charter = rows.reduce((s, r) => s + (parseInt(findCol(r, 'Total Chart')) || 0), 0);
                         window.store.stats.payToDate = rows.reduce((s, r) => s + (parseInt(findCol(r, 'Total to Date')) || 0), 0);
                         window.store.stats.clubsChartered = rows.filter(r => (findCol(r, 'Charter Date/Suspend Date') || '').toString().toLowerCase().includes('charter')).length;
-                        
                         window.store.stats.lastUpdated = lastUpdated;
-                        
                         log.innerText = `SUCCESS: DISTRICT ${window.activeDistrictId} MAPPED`;
                         window.refreshUI();
                         window.saveToCloud();
@@ -447,20 +416,34 @@
             });
         };
 
+        window.clearDistrictData = () => {
+            document.getElementById('csvDistrictInput').value = '';
+            window.store.stats = {};
+            document.getElementById('districtLog').innerText = "DISTRICT DATA CLEARED";
+            window.refreshUI();
+            window.saveToCloud();
+        };
+
+        window.clearClubData = () => {
+            document.getElementById('csvClubInput').value = '';
+            window.store.clubs = [];
+            window.store.stats.clubToDate = 0;
+            document.getElementById('clubLog').innerText = "CLUB DATA CLEARED";
+            window.refreshUI();
+            window.saveToCloud();
+        };
+
         window.exportBackup = () => {
             try {
-                if (window.activeDistrictId === "Unknown") {
-                    alert("Please map district data before exporting.");
-                    return;
-                }
+                if (window.activeDistrictId === "Unknown") { alert("Identify District first."); return; }
                 const str = JSON.stringify({ store: window.store, districtId: window.activeDistrictId });
                 const data = btoa(unescape(encodeURIComponent(str)));
                 const input = document.getElementById('backupInput');
                 input.value = data;
                 input.select();
                 document.execCommand('copy');
-                alert("Backup string generated and copied to clipboard!");
-            } catch (e) { alert("Error generating backup code."); }
+                alert("Backup string copied!");
+            } catch (e) { alert("Error generating code."); }
         };
 
         window.importBackup = (val, skipCloudSave = false) => {
@@ -475,7 +458,7 @@
                     window.refreshUI();
                     if (!skipCloudSave) window.saveToCloud();
                 }
-            } catch(e) { console.error("Restore failed"); }
+            } catch(e) { }
         };
     </script>
 
@@ -500,31 +483,16 @@
             } catch (e) { isConfigured = false; }
         }
 
-        const updateCloudStatus = (msg, color = 'text-slate-400') => {
-            const el = document.getElementById('cloudStatus');
-            if (el) {
-                el.className = `save-indicator ${color} flex items-center gap-2 italic font-medium text-nowrap`;
-                el.innerHTML = `<div class="w-2 h-2 rounded-full bg-current opacity-50 animate-pulse"></div> ${msg}`;
-            }
-        };
-
         window.saveToCloud = async () => {
             if (!isConfigured || !auth || !auth.currentUser || !isAdmin || window.activeDistrictId === "Unknown") return;
-            updateCloudStatus('Syncing...', 'text-blue-500');
             try {
                 const docRef = doc(db, 'artifacts', rawAppId, 'public', 'data', 'dashboard', 'stateDoc');
-                await setDoc(docRef, {
-                    store: window.store,
-                    activeDistrictId: window.activeDistrictId,
-                    lastUpdated: new Date().toISOString()
-                });
-                updateCloudStatus('System Synced', 'text-green-500');
-            } catch (err) { updateCloudStatus('Sync Interrupted', 'text-red-500'); }
+                await setDoc(docRef, { store: window.store, activeDistrictId: window.activeDistrictId, lastUpdated: new Date().toISOString() });
+            } catch (err) { }
         };
 
         const loadFromCloud = async () => {
             if (!isConfigured || !db) { window.dismissLoader(); return; }
-            updateCloudStatus('Retrieving...', 'text-blue-500');
             try {
                 const docRef = doc(db, 'artifacts', rawAppId, 'public', 'data', 'dashboard', 'stateDoc');
                 const snap = await getDoc(docRef);
@@ -535,44 +503,24 @@
                         window.activeDistrictId = data.activeDistrictId;
                         document.getElementById('districtSelector').value = window.activeDistrictId;
                     }
-                    const ts = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'Recently';
-                    const lbl = document.getElementById('lastSavedLabel');
-                    if (lbl) lbl.innerText = `Database Status: Ground Truth Verified (${ts})`;
-                    updateCloudStatus('Secure Connection', 'text-green-500');
-                } else {
-                    updateCloudStatus('New Session', 'text-slate-400');
                 }
                 window.refreshUI();
-            } catch (err) { 
-                updateCloudStatus('Local Mode', 'text-slate-400'); 
-            } finally {
-                window.dismissLoader();
-            }
+            } catch (err) { } finally { window.dismissLoader(); }
         };
 
         (async () => {
-            // Check for initial baked data based on default selector
             const defaultId = document.getElementById('districtSelector').value;
             if (DISTRICT_DATA_MAP[defaultId] && DISTRICT_DATA_MAP[defaultId].length > 10) {
                 window.importBackup(DISTRICT_DATA_MAP[defaultId], true);
             }
-
             setTimeout(window.dismissLoader, isConfigured ? 3500 : 500); 
-            
             if (isConfigured) {
                 try {
                     const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : "";
                     if (token) { await signInWithCustomToken(auth, token); } 
                     else { await signInAnonymously(auth); }
-                    
-                    onAuthStateChanged(auth, (user) => { 
-                        if(user) loadFromCloud(); 
-                        else window.dismissLoader();
-                    });
+                    onAuthStateChanged(auth, (user) => { if(user) loadFromCloud(); else window.dismissLoader(); });
                 } catch (e) { window.dismissLoader(); }
-            } else {
-                const lbl = document.getElementById('lastSavedLabel');
-                if (lbl) lbl.innerText = "Status: Multi-District Baked Storage Active";
             }
             window.refreshUI();
         })();
