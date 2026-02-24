@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>District Performance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .tm-maroon { background-color: #772432; }
+        .nav-link { cursor: pointer; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.2s ease; font-weight: 600; font-size: 0.875rem; }
+        .nav-link.active { background-color: rgba(255, 255, 255, 0.15); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .goal-label { font-size: 14px !important; font-weight: 700 !important; }
+        .save-indicator { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        #loadingOverlay { transition: opacity 0.4s ease; z-index: 1000; }
+        .admin-only { display: none; } 
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center pointer-events-auto opacity-100">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 text-center max-w-sm mx-4">
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-[#772432] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <div>
+                <p class="text-lg font-black uppercase tracking-tight text-slate-900">District Dashboard</p>
+                <p id="loadingSubtext" class="text-xs text-slate-400 font-bold uppercase mt-1 tracking-widest">Initializing Analytics...</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="tm-maroon text-white sticky top-0 z-50 shadow-md">
+        <div class="container mx-auto px-4 py-3 flex flex-col lg:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <span class="bg-white text-[#772432] px-2 py-0.5 rounded font-black text-xs uppercase tracking-tighter">TRIO</span>
+                <h1 id="navTitle" class="text-lg font-bold tracking-tight text-white uppercase">District Analytics</h1>
+                <select id="districtSelector" onchange="window.switchDistrict(this.value)" class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm font-bold text-white cursor-pointer hover:bg-white/20 transition-all outline-none">
+                    <option value="16">District 16</option>
+                    <option value="22">District 22</option>
+                    <option value="24" selected>District 24</option>
+                    <option value="25">District 25</option>
+                    <option value="26">District 26</option>
+                    <option value="78">District 78</option>
+                </select>
+            </div>
+            <div class="flex gap-1 bg-black/10 p-1 rounded-lg">
+                <button onclick="changeTab('summary')" id="tab-summary" class="nav-link active">Summary</button>
+                <button onclick="changeTab('divisions')" id="tab-divisions" class="nav-link">Divisions</button>
+                <button onclick="changeTab('manage')" id="tab-manage" class="nav-link text-yellow-200 font-bold admin-only">Update Data</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        
+        <div id="summary" class="page-section active">
+            <div class="mb-8 flex flex-col md:flex-row justify-between items-end gap-4 text-center md:text-left">
+                <div>
+                    <h2 id="districtTitle" class="text-3xl font-black text-slate-800 tracking-tight uppercase">Loading...</h2>
+                    <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Status: Performance Hub</p>
+                </div>
+                <div id="sourceStatus" class="flex gap-4"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-nowrap">
+                <div class="card p-6 border-l-4 border-l-blue-900 shadow-sm">
+                    <div class="flex justify-between items-start text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+                        <span>Paid Clubs</span>
+                        <span id="labelClubBase">Base: --</span>
+                    </div>
+                    <div id="valClubToDate" class="text-5xl font-black text-slate-900 mb-2 font-mono tracking-tighter">0</div>
+                    <div class="flex justify-between goal-label text-slate-500 uppercase">
+                        <span id="labelClubGoal">Goal: --</span>
+                        <span id="labelClubNeeded" class="text-blue-900 font-black tracking-widest">--</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 rounded-full mt-3 overflow-hidden shadow-inner">
+                        <div id="kpiClubProgress" class="h-full bg-[#004165] transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="card p-6 border-l-4 border-l-[#772432] shadow-sm">
+                    <div class="flex justify-between items-start text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+                        <span>Payment Goals</span>
+                        <span id="labelPayBase">Base: --</span>
+                    </div>
+                    <div id="valPayToDate" class="text-5xl font-black text-slate-900 mb-2 font-mono tracking-tighter">0</div>
+                    <div class="flex justify-between goal-label text-slate-500 uppercase">
+                        <span id="labelPayGoal">Goal: --</span>
+                        <span id="labelPayPercent" class="text-[#772432] font-black tracking-widest">0%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 rounded-full mt-3 overflow-hidden shadow-inner">
+                        <div id="kpiPayProgress" class="h-full bg-[#772432] transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <div class="card p-8 group border-t-4 border-t-yellow-400 shadow-sm">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-8 border-b pb-4 text-center md:text-left">Official Payment Breakdown</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 text-center">
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Renewals</div>
+                            <div id="valRenewals" class="text-4xl font-black text-slate-700 font-mono tracking-tighter">0</div>
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                            <div class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">New Members</div>
+                            <div id="valNewMembers" class="text-4xl font-black text-blue-600 font-mono tracking-tighter">0</div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-2xl border border-green-100">
+                            <div class="text-[9px] font-black text-green-400 uppercase tracking-widest mb-1">Charter</div>
+                            <div id="valCharter" class="text-4xl font-black text-green-600 font-mono tracking-tighter">0</div>
+                        </div>
+                        <div class="bg-yellow-50 p-6 rounded-2xl border border-yellow-100">
+                            <div class="text-[9px] font-black text-yellow-600 uppercase tracking-widest mb-1">Clubs Chartered</div>
+                            <div id="valClubsChartered" class="text-4xl font-black text-yellow-700 font-mono tracking-tighter">0</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-slate-50 uppercase tracking-widest gap-2">
+                        <span class="text-[10px] font-black text-slate-400 uppercase">Total Collected To Date:</span>
+                        <span id="valTotalPayments" class="text-5xl font-black text-[#772432] font-mono tracking-tighter">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <div class="card p-8 text-center md:text-left border-l-4 border-l-[#004165] shadow-sm">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Paid Member Comparison (Club Row Sums)</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                        <div class="lg:col-span-2 h-[220px]">
+                            <canvas id="aggMemberChart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 text-center md:text-left bg-slate-50 p-6 rounded-2xl shadow-inner">
+                            <div>
+                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Row Base</div>
+                                <div id="sumBase" class="text-2xl font-black text-slate-800 font-mono">0</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Row Active</div>
+                                <div id="sumToDate" class="text-2xl font-black text-[#772432] font-mono">0</div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Row Net Growth</div>
+                                <div id="sumNet" class="text-2xl font-black font-mono">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <div class="card p-8 border-l-4 border-l-yellow-500 relative overflow-hidden text-center md:text-left shadow-sm">
+                    <div class="flex justify-between items-center mb-6 relative z-10 text-slate-400">
+                        <span class="text-xs font-black uppercase tracking-widest">Potential Distinguished Clubs</span>
+                        <div class="text-right">
+                            <span id="valPotCount" class="text-3xl font-black text-[#772432] font-mono">0</span>
+                            <span class="goal-label block uppercase tracking-widest"> Ready / Goal: <span id="labelDistGoal">--</span></span>
+                        </div>
+                    </div>
+                    <div class="h-[120px] relative z-10"><canvas id="potSummaryChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divisions" class="page-section">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 text-center md:text-left">
+                <div class="card p-8"><h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Active Members by Division</h3><canvas id="divActiveChart" height="300"></canvas></div>
+                <div class="card p-8"><h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-2">Potential Dist. Clubs by Division</h3><canvas id="divPotChart" height="300"></canvas></div>
+            </div>
+        </div>
+
+        <div id="manage" class="page-section admin-only">
+            <h2 class="text-2xl font-bold text-slate-700 uppercase tracking-tight mb-6">Update Data Console</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="card p-8 border-t-4 border-t-[#772432]">
+                    <h3 class="font-black text-xs uppercase text-slate-400 mb-2">1. District Performance CSV</h3>
+                    <textarea id="csvDistrictInput" class="w-full h-48 bg-slate-50 border rounded-2xl p-4 text-[10px] font-mono focus:outline-none" placeholder="Paste District CSV content here..."></textarea>
+                    <button onclick="processDistrictCSV()" class="mt-4 w-full tm-maroon text-white font-black py-3 rounded-xl shadow-lg active:scale-[0.98]">Map District Stats</button>
+                    <div id="districtLog" class="text-[10px] font-bold text-green-600 mt-2 text-center uppercase tracking-widest"></div>
+                </div>
+                <div class="card p-8 border-t-4 border-t-[#004165]">
+                    <h3 class="font-black text-xs uppercase text-slate-400 mb-2">2. Club Performance CSV</h3>
+                    <textarea id="csvClubInput" class="w-full h-48 bg-slate-50 border rounded-2xl p-4 text-[10px] font-mono focus:outline-none" placeholder="Paste Club CSV content here..."></textarea>
+                    <button onclick="processClubCSV()" class="mt-4 w-full bg-[#004165] text-white font-black py-3 rounded-xl shadow-lg active:scale-[0.98]">Map Club Rows</button>
+                    <div id="clubLog" class="text-[10px] font-bold text-green-600 mt-2 text-center uppercase tracking-widest"></div>
+                </div>
+            </div>
+
+            <div class="card p-8 border-t-4 border-t-amber-500 bg-amber-50/30">
+                <h3 class="font-black text-xs uppercase text-amber-600 mb-2">Manual Data Backup String</h3>
+                <p class="text-[10px] text-amber-700 mb-4 font-medium uppercase tracking-tight">Copy this text and save it to a notepad. Paste it back here to restore your data instantly.</p>
+                <div class="flex gap-2">
+                    <input id="backupInput" type="text" class="flex-grow bg-white border border-amber-200 rounded-lg px-4 py-2 text-[10px] font-mono" placeholder="Backup string generation...">
+                    <button onclick="exportBackup()" class="bg-amber-600 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase">Copy Link</button>
+                    <button onclick="importBackup()" class="bg-amber-800 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase">Restore</button>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <p id="lastSavedLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Dashboard Sync Status: Local Mode</p>
+                <div class="mt-2 flex justify-center gap-2">
+                    <button id="saveBtn" onclick="window.saveToCloud()" class="bg-slate-800 text-white text-[10px] px-3 py-1 rounded font-bold uppercase hover:bg-black transition-all">Manual Sync</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * ROBUST DATA CONTROLLER
+         */
+        const BASELINES = {
+            "16": { clubBase: 51, clubGoal: 52, payGoal: 1785, distGoal: 23 },
+            "22": { clubBase: 59, clubGoal: 60, payGoal: 1966, distGoal: 27 },
+            "24": { clubBase: 49, clubGoal: 50, payGoal: 1318, distGoal: 23 },
+            "25": { clubBase: 118, clubGoal: 120, payGoal: 4194, distGoal: 54 },
+            "26": { clubBase: 146, clubGoal: 148, payGoal: 5483, distGoal: 66 },
+            "78": { clubBase: 54, clubGoal: 55, payGoal: 1756, distGoal: 25 }
+        };
+
+        const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+        if (isAdmin) { document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block'); }
+
+        window.store = { stats: {}, clubs: [] }; 
+        window.activeDistrictId = "Unknown";
+        window.charts = {};
+
+        window.dismissLoader = () => {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) {
+                loader.style.opacity = "0";
+                loader.style.pointerEvents = "none";
+                setTimeout(() => loader.style.display = "none", 500);
+            }
+        };
+
+        window.changeTab = (id) => {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const tabBtn = document.getElementById('tab-' + id);
+            if (tabBtn) tabBtn.classList.add('active');
+            window.refreshUI(); 
+        };
+
+        window.switchDistrict = (id) => {
+            window.activeDistrictId = id;
+            window.refreshUI();
+        };
+
+        const findCol = (row, ...aliases) => {
+            const keys = Object.keys(row);
+            const aliasSet = aliases.map(a => a.toLowerCase().replace(/[^a-z0-9]/g, ''));
+            for (let key of keys) {
+                const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (aliasSet.includes(normalizedKey)) return row[key];
+            }
+            return undefined;
+        };
+
+        window.refreshUI = () => {
+            const currentId = window.activeDistrictId;
+            const d = window.store || { stats: {}, clubs: [] };
+            const s = d.stats || {};
+            const base = BASELINES[currentId] || { clubBase: 0, clubGoal: 0, payGoal: 0, distGoal: 0 };
+
+            document.getElementById('navTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Analytics` : "District Performance Dashboard";
+            document.getElementById('districtTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Summary` : "Dashboard Ready";
+            
+            document.getElementById('labelClubBase').innerText = `Base: ${base.clubBase || '--'}`;
+            document.getElementById('valClubToDate').innerText = s.clubToDate || 0;
+            document.getElementById('labelClubGoal').innerText = `Goal: ${base.clubGoal || '--'}`;
+            const cN = (base.clubGoal || 0) - (s.clubToDate || 0);
+            document.getElementById('labelClubNeeded').innerText = currentId !== "Unknown" ? (cN > 0 ? `${cN} MORE` : "MET") : "--";
+            document.getElementById('kpiClubProgress').style.width = `${Math.min(100, base.clubGoal ? (s.clubToDate / base.clubGoal) * 100 : 0)}%`;
+
+            document.getElementById('labelPayBase').innerText = `Base: ${base.clubBase || '--'}`;
+            document.getElementById('valPayToDate').innerText = s.payToDate || 0;
+            document.getElementById('labelPayGoal').innerText = `Goal: ${base.payGoal || '--'}`;
+            const pPct = base.payGoal ? ((s.payToDate/base.payGoal)*100) : 0;
+            document.getElementById('labelPayPercent').innerText = pPct.toFixed(1) + "%";
+            document.getElementById('kpiPayProgress').style.width = `${Math.min(100, pPct)}%`;
+
+            document.getElementById('valRenewals').innerText = s.renewals || 0;
+            document.getElementById('valNewMembers').innerText = s.new || 0;
+            document.getElementById('valCharter').innerText = s.charter || 0;
+            document.getElementById('valTotalPayments').innerText = s.payToDate || 0;
+            document.getElementById('valClubsChartered').innerText = s.clubsChartered || 0;
+            document.getElementById('labelDistGoal').innerText = base.distGoal || '--';
+
+            const agg = (d.clubs || []).reduce((acc, c) => ({
+                base: acc.base + c.base, active: acc.active + c.active, net: acc.net + c.net
+            }), { base: 0, active: 0, net: 0 });
+
+            document.getElementById('sumBase').innerText = agg.base;
+            document.getElementById('sumToDate').innerText = agg.active;
+            const sn = document.getElementById('sumNet');
+            sn.innerText = (agg.net >= 0 ? '+' : '') + agg.net;
+            sn.className = `text-2xl font-black font-mono ${agg.net >= 0 ? 'text-green-600' : 'text-red-500'}`;
+
+            Object.values(window.charts).forEach(c => c && c.destroy());
+            try {
+                const ctx1 = document.getElementById('aggMemberChart');
+                if (ctx1 && ctx1.offsetParent) {
+                    window.charts.mem = new Chart(ctx1.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['Row Base', 'Row Active', 'Row Net'],
+                            datasets: [{ data: [agg.base, agg.active, agg.net], backgroundColor: ['#cbd5e1', '#772432', agg.net >= 0 ? '#10b981' : '#ef4444'], borderRadius: 8 }]
+                        },
+                        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+                }
+                const pots = (d.clubs || []).filter(c => c.csp === 'Y' && c.goals >= 4 && c.net >= 3);
+                document.getElementById('valPotCount').innerText = pots.length;
+                const gCounts = {4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0};
+                pots.forEach(c => { if(c.goals >= 4) gCounts[c.goals]++; });
+                const ctx2 = document.getElementById('potSummaryChart');
+                if (ctx2 && ctx2.offsetParent) {
+                    window.charts.pot = new Chart(ctx2.getContext('2d'), {
+                        type: 'bar',
+                        data: { labels: ['4G', '5G', '6G', '7G', '8G', '9G', '10G'], datasets: [{ data: Object.values(gCounts), backgroundColor: '#facc15' }] },
+                        options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+                    });
+                }
+                const divs = [...new Set((d.clubs || []).map(c => c.div))].sort();
+                const divA = divs.map(dv => (d.clubs || []).filter(c => c.div === dv).reduce((s, c) => s + c.active, 0));
+                const ctx3 = document.getElementById('divActiveChart');
+                if (ctx3 && ctx3.offsetParent) {
+                    window.charts.divA = new Chart(ctx3.getContext('2d'), {
+                        type: 'bar',
+                        data: { labels: divs, datasets: [{ data: divA, backgroundColor: '#004165', label: 'Active Members' }] },
+                        options: { maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+                    });
+                }
+                const divP = divs.map(dv => (d.clubs || []).filter(c => c.div === dv && c.csp === 'Y' && c.goals >= 4 && c.net >= 3).length);
+                const ctx4 = document.getElementById('divPotChart');
+                if (ctx4 && ctx4.offsetParent) {
+                    window.charts.divP = new Chart(ctx4.getContext('2d'), {
+                        type: 'bar',
+                        data: { labels: divs, datasets: [{ data: divP, backgroundColor: '#772432', label: 'Ready Clubs' }] },
+                        options: { maintainAspectRatio: false, scales: { y: { ticks: { stepSize: 1 } } } }
+                    });
+                }
+            } catch (e) { }
+        };
+
+        window.processDistrictCSV = () => {
+            if (!isAdmin) return;
+            const csv = document.getElementById('csvDistrictInput').value;
+            const log = document.getElementById('districtLog');
+            if(!csv.trim()) return;
+            log.innerText = "MAPPING...";
+            Papa.parse(csv, {
+                header: true, skipEmptyLines: true,
+                complete: (results) => {
+                    const rows = results.data;
+                    if(rows.length === 0) return;
+                    const detectedId = findCol(rows[0], 'District', 'Dist', 'ID');
+                    if(detectedId && BASELINES[detectedId.toString()]) {
+                        window.activeDistrictId = detectedId.toString();
+                        document.getElementById('districtSelector').value = window.activeDistrictId;
+                        window.store.stats.renewals = rows.reduce((s, r) => s + (parseInt(findCol(r, 'Total Ren')) || 0), 0);
+                        window.store.stats.new = rows.reduce((s, r) => s + (parseInt(findCol(r, 'New')) || 0), 0);
+                        window.store.stats.charter = rows.reduce((s, r) => s + (parseInt(findCol(r, 'Total Chart')) || 0), 0);
+                        window.store.stats.payToDate = rows.reduce((s, r) => s + (parseInt(findCol(r, 'Total to Date')) || 0), 0);
+                        window.store.stats.clubsChartered = rows.filter(r => (findCol(r, 'Charter Date/Suspend Date') || '').toString().toLowerCase().includes('charter')).length;
+                        log.innerText = `SUCCESS: DISTRICT ${window.activeDistrictId} MAPPED`;
+                        window.refreshUI();
+                        window.saveToCloud();
+                    }
+                }
+            });
+        };
+
+        window.processClubCSV = () => {
+            if (!isAdmin) return;
+            const csv = document.getElementById('csvClubInput').value;
+            const log = document.getElementById('clubLog');
+            if(!csv.trim()) return;
+            log.innerText = "MAPPING...";
+            Papa.parse(csv, {
+                header: true, skipEmptyLines: true,
+                complete: (results) => {
+                    window.store.clubs = results.data.filter(r => findCol(r, 'Club Name', 'Name')).map(r => ({
+                        status: findCol(r, 'Club Status') || 'Inactive',
+                        csp: findCol(r, 'CSP') || 'N',
+                        div: findCol(r, 'Division', 'Div') || '?',
+                        base: parseInt(findCol(r, 'Mem Base', 'Member Base')) || 0,
+                        active: parseInt(findCol(r, 'Active Members')) || 0,
+                        net: parseInt(findCol(r, 'Net Growth')) || 0,
+                        goals: parseInt(findCol(r, 'Goals Met', 'Goals')) || 0
+                    }));
+                    window.store.stats.clubToDate = (window.store.clubs || []).filter(c => c.status === 'Active').length;
+                    log.innerText = `SUCCESS: ${(window.store.clubs || []).length} CLUBS MAPPED`;
+                    window.refreshUI();
+                    window.saveToCloud();
+                }
+            });
+        };
+
+        window.exportBackup = () => {
+            const data = btoa(JSON.stringify({ store: window.store, districtId: window.activeDistrictId }));
+            document.getElementById('backupInput').value = data;
+            document.getElementById('backupInput').select();
+            document.execCommand('copy');
+        };
+
+        window.importBackup = () => {
+            const val = document.getElementById('backupInput').value;
+            if (!val) return;
+            try {
+                const data = JSON.parse(atob(val));
+                window.store = data.store;
+                window.activeDistrictId = data.districtId;
+                window.refreshUI();
+                window.saveToCloud();
+            } catch(e) { console.error("Backup corrupted."); }
+        };
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment Detection
+        const rawConfig = typeof __firebase_config !== 'undefined' ? __firebase_config : "";
+        const rawAppId = typeof __app_id !== 'undefined' ? __app_id : "external-host";
+        
+        let db, auth;
+        let isConfigured = false;
+
+        if (rawConfig && rawConfig.length > 10) {
+            try {
+                const firebaseConfig = JSON.parse(rawConfig);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                isConfigured = true;
+            } catch (e) { isConfigured = false; }
+        }
+
+        const updateCloudStatus = (msg, color = 'text-slate-400') => {
+            const el = document.getElementById('cloudStatus');
+            if (el) {
+                el.className = `save-indicator ${color} flex items-center gap-2 italic font-medium text-nowrap`;
+                el.innerHTML = `<div class="w-2 h-2 rounded-full bg-current opacity-50 animate-pulse"></div> ${msg}`;
+            }
+        };
+
+        window.saveToCloud = async () => {
+            if (!isConfigured || !auth || !auth.currentUser || !isAdmin || window.activeDistrictId === "Unknown") return;
+            updateCloudStatus('Syncing...', 'text-blue-500');
+            try {
+                const docRef = doc(db, 'artifacts', rawAppId, 'public', 'data', 'dashboard', 'stateDoc');
+                await setDoc(docRef, {
+                    store: window.store,
+                    activeDistrictId: window.activeDistrictId,
+                    lastUpdated: new Date().toISOString()
+                });
+                updateCloudStatus('System Synced', 'text-green-500');
+            } catch (err) { updateCloudStatus('Sync Interrupted', 'text-red-500'); }
+        };
+
+        const loadFromCloud = async () => {
+            if (!isConfigured || !db) { window.dismissLoader(); return; }
+            updateCloudStatus('Retrieving...', 'text-blue-500');
+            try {
+                const docRef = doc(db, 'artifacts', rawAppId, 'public', 'data', 'dashboard', 'stateDoc');
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.store) window.store = data.store;
+                    if (data.activeDistrictId) {
+                        window.activeDistrictId = data.activeDistrictId;
+                        document.getElementById('districtSelector').value = window.activeDistrictId;
+                    }
+                    const ts = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'Recently';
+                    const lbl = document.getElementById('lastSavedLabel');
+                    if (lbl) lbl.innerText = `Database Status: Shared Ground Truth Restored (${ts})`;
+                    updateCloudStatus('Secure Connection', 'text-green-500');
+                } else {
+                    updateCloudStatus('New Session', 'text-slate-400');
+                }
+                window.refreshUI();
+            } catch (err) { 
+                updateCloudStatus('Local Mode', 'text-slate-400'); 
+            } finally {
+                window.dismissLoader();
+            }
+        };
+
+        (async () => {
+            // Standard host deployment bypasses the wheel in < 1 second.
+            setTimeout(window.dismissLoader, isConfigured ? 3500 : 500); 
+            
+            if (isConfigured) {
+                try {
+                    const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : "";
+                    if (token) { await signInWithCustomToken(auth, token); } 
+                    else { await signInAnonymously(auth); }
+                    
+                    onAuthStateChanged(auth, (user) => { 
+                        if(user) loadFromCloud(); 
+                        else window.dismissLoader();
+                    });
+                } catch (e) { window.dismissLoader(); }
+            } else {
+                const lbl = document.getElementById('lastSavedLabel');
+                if (lbl) lbl.innerText = "System: Standalone Local Mode (Cloud Disabled)";
+            }
+            window.refreshUI();
+        })();
+    </script>
+</body>
+</html>
