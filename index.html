@@ -71,7 +71,9 @@
             <div class="mb-8 flex flex-col md:flex-row justify-between items-end gap-4 text-center md:text-left">
                 <div>
                     <h2 id="districtTitle" class="text-3xl font-black text-slate-800 tracking-tight uppercase">Loading...</h2>
-                    <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Status: Performance Hub</p>
+                    <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">
+                        Status: Performance Hub <span id="headerLastUpdated" class="ml-2 text-[#772432] font-black"></span>
+                    </p>
                 </div>
                 <div id="sourceStatus" class="flex gap-4"></div>
             </div>
@@ -202,7 +204,7 @@
 
             <div class="card p-8 border-t-4 border-t-amber-500 bg-amber-50/30">
                 <h3 class="font-black text-xs uppercase text-amber-600 mb-2">Manual Data Backup String</h3>
-                <p class="text-[10px] text-amber-700 mb-4 font-medium uppercase tracking-tight">Copy this text and save it to a notepad. Paste it back here to restore your data instantly.</p>
+                <p class="text-[10px] text-amber-700 mb-4 font-medium uppercase tracking-tight">Copy this text and save it to the appropriate slot in the code below to make it permanent.</p>
                 <div class="flex gap-2">
                     <input id="backupInput" type="text" class="flex-grow bg-white border border-amber-200 rounded-lg px-4 py-2 text-[10px] font-mono" placeholder="Backup string generation...">
                     <button onclick="exportBackup()" class="bg-amber-600 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase hover:opacity-90">Copy Code</button>
@@ -211,7 +213,7 @@
             </div>
 
             <div class="mt-8 text-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <p id="lastSavedLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic text-nowrap">Dashboard Sync Status: Local Standalone</p>
+                <p id="lastSavedLabel" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic text-nowrap">Dashboard Sync Status: Multi-District Baked Storage</p>
                 <div class="mt-2 flex justify-center gap-2">
                     <button id="saveBtn" onclick="window.saveToCloud()" class="bg-slate-800 text-white text-[10px] px-3 py-1 rounded font-bold uppercase hover:bg-black transition-all">Manual Sync</button>
                 </div>
@@ -232,10 +234,16 @@
             "78": { clubBase: 54, clubGoal: 55, payGoal: 1756, distGoal: 25 }
         };
 
-        // --- HARDCODING SLOT START ---
-        // PASTE YOUR "COPY CODE" STRING BETWEEN THE QUOTES BELOW TO MAKE DATA PERMANENT
-        const PERMANENT_DATA_RESTORE_STRING = "eyJzdG9yZSI6eyJzdGF0cyI6eyJyZW5ld2FscyI6NzE4LCJuZXciOjE1MywiY2hhcnRlciI6MCwicGF5VG9EYXRlIjo4NzEsImNsdWJzQ2hhcnRlcmVkIjowLCJjbHViVG9EYXRlIjo0NH0sImNsdWJzIjpbeyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiSyIsImJhc2UiOjIyLCJhY3RpdmUiOjMxLCJuZXQiOjksImdvYWxzIjo5fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6Ik4iLCJkaXYiOiJLIiwiYmFzZSI6MTEsImFjdGl2ZSI6OCwibmV0IjotMywiZ29hbHMiOjF9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjo5LCJhY3RpdmUiOjksIm5ldCI6MCwiZ29hbHMiOjN9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjo5LCJhY3RpdmUiOjgsIm5ldCI6LTEsImdvYWxzIjowfSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6Ik4iLCJkaXYiOiJLIiwiYmFzZSI6MCwiYWN0aXZlIjowLCJuZXQiOjAsImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MTUsImFjdGl2ZSI6MTUsIm5ldCI6MCwiZ29hbHMiOjF9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjoxMywiYWN0aXZlIjoxNCwibmV0IjoxLCJnb2FscyI6Nn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiSyIsImJhc2UiOjIsImFjdGl2ZSI6OCwibmV0Ijo2LCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiSyIsImJhc2UiOjEyLCJhY3RpdmUiOjgsIm5ldCI6LTQsImdvYWxzIjozfSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6Ik4iLCJkaXYiOiJLIiwiYmFzZSI6MjIsImFjdGl2ZSI6MCwibmV0IjotMjIsImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MjQsImFjdGl2ZSI6MTksIm5ldCI6LTUsImdvYWxzIjo2fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MTUsImFjdGl2ZSI6MTYsIm5ldCI6MSwiZ29hbHMiOjN9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjoxMiwiYWN0aXZlIjoxMSwibmV0IjotMSwiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjoxMCwiYWN0aXZlIjoxMiwibmV0IjoyLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJMb3ciLCJjc3AiOiJOIiwiZGl2IjoiSyIsImJhc2UiOjE1LCJhY3RpdmUiOjYsIm5ldCI6LTksImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJLIiwiYmFzZSI6MjEsImFjdGl2ZSI6MjcsIm5ldCI6NiwiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IksiLCJiYXNlIjoxNywiYWN0aXZlIjoxNiwibmV0IjotMSwiZ29hbHMiOjJ9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiTiIsImRpdiI6IksiLCJiYXNlIjoxMywiYWN0aXZlIjoxOCwibmV0Ijo1LCJnb2FscyI6MX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjE0LCJhY3RpdmUiOjE2LCJuZXQiOjIsImdvYWxzIjozfSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6Ik4iLCJkaXYiOiJPIiwiYmFzZSI6MiwiYWN0aXZlIjowLCJuZXQiOi0yLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjEyLCJhY3RpdmUiOjEyLCJuZXQiOjAsImdvYWxzIjoxfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6MTksImFjdGl2ZSI6MTcsIm5ldCI6LTIsImdvYWxzIjoyfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6MjAsImFjdGl2ZSI6MTksIm5ldCI6LTEsImdvYWxzIjoxfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6MjYsImFjdGl2ZSI6MjQsIm5ldCI6LTIsImdvYWxzIjo3fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6MTMsImFjdGl2ZSI6MTMsIm5ldCI6MCwiZ29hbHMiOjN9LHsic3RhdHVzIjoiU3VzcGVuZGVkIiwiY3NwIjoiTiIsImRpdiI6Ik8iLCJiYXNlIjo2LCJhY3RpdmUiOjUsIm5ldCI6LTEsImdvYWxzIjowfSx7InN0YXR1cyI6IkxvdyIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6OCwiYWN0aXZlIjo1LCJuZXQiOi0zLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJOIiwiZGl2IjoiTyIsImJhc2UiOjM4LCJhY3RpdmUiOjMwLCJuZXQiOi04LCJnb2FscyI6NH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjIyLCJhY3RpdmUiOjI0LCJuZXQiOjIsImdvYWxzIjo1fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6MjEsImFjdGl2ZSI6MTQsIm5ldCI6LTcsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6OCwiYWN0aXZlIjo4LCJuZXQiOjAsImdvYWxzIjoxfSx7InN0YXR1cyI6IkxvdyIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6OCwiYWN0aXZlIjo2LCJuZXQiOi0yLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjEzLCJhY3RpdmUiOjE2LCJuZXQiOjMsImdvYWxzIjo1fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJPIiwiYmFzZSI6MzAsImFjdGl2ZSI6MzMsIm5ldCI6MywiZ29hbHMiOjh9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6Ik8iLCJiYXNlIjoyNCwiYWN0aXZlIjoyOCwibmV0Ijo0LCJnb2FscyI6NH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiTyIsImJhc2UiOjgsImFjdGl2ZSI6OSwibmV0IjoxLCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjI1LCJhY3RpdmUiOjI1LCJuZXQiOjAsImdvYWxzIjo3fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6OSwiYWN0aXZlIjo5LCJuZXQiOjAsImdvYWxzIjoyfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6OSwiYWN0aXZlIjo5LCJuZXQiOjAsImdvYWxzIjo0fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTQsImFjdGl2ZSI6MTMsIm5ldCI6LTEsImdvYWxzIjo4fSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6Ik4iLCJkaXYiOiJUIiwiYmFzZSI6OCwiYWN0aXZlIjowLCJuZXQiOi04LCJnb2FscyI6MH0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjE0LCJhY3RpdmUiOjE4LCJuZXQiOjQsImdvYWxzIjo1fSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTIsImFjdGl2ZSI6OCwibmV0IjotNCwiZ29hbHMiOjN9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoyMSwiYWN0aXZlIjoxNCwibmV0IjotNywiZ29hbHMiOjR9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoxNSwiYWN0aXZlIjoxOSwibmV0Ijo0LCJnb2FscyI6NX0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjgsImFjdGl2ZSI6OSwibmV0IjoxLCJnb2FscyI6Mn0seyJzdGF0dXMiOiJBY3RpdmUiLCJjc3AiOiJZIiwiZGl2IjoiVCIsImJhc2UiOjIwLCJhY3RpdmUiOjE2LCJuZXQiOi00LCJnb2FscyI6Nn0seyJzdGF0dXMiOiJMb3ciLCJjc3AiOiJOIiwiZGl2IjoiVCIsImJhc2UiOjEwLCJhY3RpdmUiOjMsIm5ldCI6LTcsImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTEsImFjdGl2ZSI6MTAsIm5ldCI6LTEsImdvYWxzIjoyfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTEsImFjdGl2ZSI6MTAsIm5ldCI6LTEsImdvYWxzIjowfSx7InN0YXR1cyI6IlN1c3BlbmRlZCIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MywiYWN0aXZlIjozLCJuZXQiOjAsImdvYWxzIjowfSx7InN0YXR1cyI6IkFjdGl2ZSIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MjEsImFjdGl2ZSI6MjAsIm5ldCI6LTEsImdvYWxzIjo4fSx7InN0YXR1cyI6IkxvdyIsImNzcCI6IlkiLCJkaXYiOiJUIiwiYmFzZSI6MTAsImFjdGl2ZSI6NiwibmV0IjotNCwiZ29hbHMiOjN9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoxMSwiYWN0aXZlIjoxMCwibmV0IjotMSwiZ29hbHMiOjN9LHsic3RhdHVzIjoiQWN0aXZlIiwiY3NwIjoiWSIsImRpdiI6IlQiLCJiYXNlIjoxNSwiYWN0aXZlIjoxNSwibmV0IjowLCJnb2FscyI6M31dfSwiZGlzdHJpY3RJZCI6IjE2In0="; 
-        // --- HARDCODING SLOT END ---
+        // --- MULTI-DISTRICT BAKED DATA MAP ---
+        // Paste your exported code strings here for each district to make them permanent.
+        const DISTRICT_DATA_MAP = {
+            "16": "",
+            "22": "",
+            "24": "",
+            "25": "",
+            "26": "",
+            "78": ""
+        };
 
         const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
         if (isAdmin) { document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block'); }
@@ -264,7 +272,12 @@
 
         window.switchDistrict = (id) => {
             window.activeDistrictId = id;
-            window.refreshUI();
+            if (DISTRICT_DATA_MAP[id] && DISTRICT_DATA_MAP[id].length > 10) {
+                window.importBackup(DISTRICT_DATA_MAP[id], true);
+            } else {
+                window.store = { stats: {}, clubs: [] };
+                window.refreshUI();
+            }
         };
 
         const findCol = (row, ...aliases) => {
@@ -286,6 +299,12 @@
             document.getElementById('navTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Analytics` : "District Performance Dashboard";
             document.getElementById('districtTitle').innerText = currentId !== "Unknown" ? `District ${currentId} Summary` : "Identify District";
             
+            // Header: Last Updated
+            const luEl = document.getElementById('headerLastUpdated');
+            if (luEl) {
+                luEl.innerText = s.lastUpdated ? `• AS OF: ${s.lastUpdated}` : "";
+            }
+
             document.getElementById('labelClubBase').innerText = `Base: ${base.clubBase || '--'}`;
             document.getElementById('valClubToDate').innerText = s.clubToDate || 0;
             document.getElementById('labelClubGoal').innerText = `Goal: ${base.clubGoal || '--'}`;
@@ -330,7 +349,7 @@
                         options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
                     });
                 }
-                const pots = (d.clubs || []).filter(c => c.csp === 'Y' && c.goals >= 4 && c.net >= 3);
+                const pots = (d.clubs || []).filter(c => c.goals >= 4 && (c.active >= 20 || c.net >= 3));
                 document.getElementById('valPotCount').innerText = pots.length;
                 const gCounts = {4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0};
                 pots.forEach(c => { if(c.goals >= 4) gCounts[c.goals]++; });
@@ -352,7 +371,7 @@
                         options: { maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
                     });
                 }
-                const divP = divs.map(dv => (d.clubs || []).filter(c => c.div === dv && c.csp === 'Y' && c.goals >= 4 && c.net >= 3).length);
+                const divP = divs.map(dv => (d.clubs || []).filter(c => c.div === dv && c.goals >= 4 && (c.active >= 20 || c.net >= 3)).length);
                 const ctx4 = document.getElementById('divPotChart');
                 if (ctx4 && ctx4.offsetParent) {
                     window.charts.divP = new Chart(ctx4.getContext('2d'), {
@@ -375,6 +394,13 @@
                 complete: (results) => {
                     const rows = results.data;
                     if(rows.length === 0) return;
+                    
+                    // Capture Last Line for "Last Updated" Info
+                    const lastLineRow = rows[rows.length - 1];
+                    const lastLineValues = Object.values(lastLineRow);
+                    // Extract first non-numeric/meaningful string from the last row (usually contains Month)
+                    const lastUpdated = lastLineValues.find(v => v && v.toString().length > 3 && isNaN(v)) || "Recent";
+
                     const detectedId = findCol(rows[0], 'District', 'Dist', 'ID');
                     if(detectedId && BASELINES[detectedId.toString()]) {
                         window.activeDistrictId = detectedId.toString();
@@ -384,6 +410,9 @@
                         window.store.stats.charter = rows.reduce((s, r) => s + (parseInt(findCol(r, 'Total Chart')) || 0), 0);
                         window.store.stats.payToDate = rows.reduce((s, r) => s + (parseInt(findCol(r, 'Total to Date')) || 0), 0);
                         window.store.stats.clubsChartered = rows.filter(r => (findCol(r, 'Charter Date/Suspend Date') || '').toString().toLowerCase().includes('charter')).length;
+                        
+                        window.store.stats.lastUpdated = lastUpdated;
+                        
                         log.innerText = `SUCCESS: DISTRICT ${window.activeDistrictId} MAPPED`;
                         window.refreshUI();
                         window.saveToCloud();
@@ -434,8 +463,7 @@
             } catch (e) { alert("Error generating backup code."); }
         };
 
-        window.importBackup = (valOverride = null) => {
-            const val = valOverride || document.getElementById('backupInput').value;
+        window.importBackup = (val, skipCloudSave = false) => {
             if (!val) return;
             try {
                 const str = decodeURIComponent(escape(atob(val)));
@@ -445,10 +473,9 @@
                     window.activeDistrictId = data.districtId;
                     document.getElementById('districtSelector').value = window.activeDistrictId;
                     window.refreshUI();
-                    window.saveToCloud();
-                    if (!valOverride) alert("Data restored successfully!");
+                    if (!skipCloudSave) window.saveToCloud();
                 }
-            } catch(e) { if (!valOverride) alert("Invalid or corrupted backup string."); }
+            } catch(e) { console.error("Restore failed"); }
         };
     </script>
 
@@ -524,12 +551,12 @@
         };
 
         (async () => {
-            // First: Attempt to load from the "Baked-in" slot for static persistence
-            if (PERMANENT_DATA_RESTORE_STRING && PERMANENT_DATA_RESTORE_STRING.length > 10) {
-                window.importBackup(PERMANENT_DATA_RESTORE_STRING);
+            // Check for initial baked data based on default selector
+            const defaultId = document.getElementById('districtSelector').value;
+            if (DISTRICT_DATA_MAP[defaultId] && DISTRICT_DATA_MAP[defaultId].length > 10) {
+                window.importBackup(DISTRICT_DATA_MAP[defaultId], true);
             }
 
-            // Standard host deployment bypasses the wheel quickly
             setTimeout(window.dismissLoader, isConfigured ? 3500 : 500); 
             
             if (isConfigured) {
@@ -545,7 +572,7 @@
                 } catch (e) { window.dismissLoader(); }
             } else {
                 const lbl = document.getElementById('lastSavedLabel');
-                if (lbl) lbl.innerText = PERMANENT_DATA_RESTORE_STRING ? "Status: Baked Data Active" : "Status: Waiting for Data Configuration";
+                if (lbl) lbl.innerText = "Status: Multi-District Baked Storage Active";
             }
             window.refreshUI();
         })();
